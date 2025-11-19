@@ -75,5 +75,50 @@ def logout_view(request):
 def student_dashboard(request):
     return render(request, 'students/dashboard.html')
 
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from django.contrib.auth.models import User
+from django.contrib.auth import logout
+from .models import Student
+
 def student_password_change(request):
+    """
+    Allow student to reset password using their register number.
+    """
+    if request.method == "POST":
+        register_no = request.POST.get("register_no")
+        password1 = request.POST.get("password1")
+        password2 = request.POST.get("password2")
+
+        # Check if student exists with given register_no
+        try:
+            student = Student.objects.get(register_no=register_no)
+            user = student.user
+        except Student.DoesNotExist:
+            messages.error(request, "No student account found with this registration number.")
+            return render(request, 'students/reset_password.html')
+
+        # Validate passwords
+        if password1 != password2:
+            messages.error(request, "Passwords do not match.")
+        elif len(password1) < 6:
+            messages.error(request, "Password must be at least 6 characters long.")
+        else:
+            # Update password
+            user.set_password(password1)
+            user.save()
+
+            # Log out if logged in
+            logout(request)
+
+            messages.success(request, "Password updated successfully! You can now log in.")
+            return redirect('student_login')
+
     return render(request, 'students/reset_password.html')
+
+
+
+
+
+
+
