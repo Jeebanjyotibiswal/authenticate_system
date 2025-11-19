@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: nalanda-app
+    env: python
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn nalanda.wsgi:application"
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: nalanda.settings
+      - key: PYTHON_VERSION
+        value: 3.10
